@@ -1,6 +1,6 @@
 # 介绍
 
-Vue Router 是【Vue.js】(http://v3.vuejs.org)的官方路由器。它与 Vue.js 核心深度集成，让用 Vue.js 构建单页应用变得轻而易举。功能包括
+Vue Router 是【Vue.js】(http://v3.vuejs.org)的官方路由。它与 Vue.js 核心深度集成，让用 Vue.js 构建单页应用变得轻而易举。功能包括：
 
 - 嵌套路由映射
 - 动态路由选择
@@ -15,4 +15,4 @@ Vue Router 是【Vue.js】(http://v3.vuejs.org)的官方路由器。它与 Vue.j
 
 <HomeSponsors />
 
-[入门](/zh/guide/)或使用[playground](https://github.com/vuejs/vue-router-next/tree/master/playground)(参见[`README.md`](https://github.com/vuejs/vue-router-next)来运行它们)。
+[入门](/zh/guide/)或使用 [playground](https://github.com/vuejs/vue-router-next/tree/master/playground) (参见[`README.md`](https://github.com/vuejs/vue-router-next)来运行它们)。
