@@ -15,12 +15,17 @@ if (process.env.NODE_ENV === 'production') {
 
 /** @type {UserConfig} */
 const config = {
-  lang: 'en-US',
+  lang: 'zh-CN',
   title: 'Vue Router',
   description: 'The official router for Vue.js.',
   locales: {
     '/': {
       lang: 'en-US',
+      title: 'Vue Router',
+      description: 'The official router for Vue.js.',
+    },
+    zh: {
+      lang: 'zh-CN',
       title: 'Vue Router',
       description: 'The official router for Vue.js.',
     },
@@ -177,6 +182,132 @@ const config = {
           },
         ],
       },
+    },
+
+    // 简体中文
+    '/zh': {
+      nav: [
+        {
+          text: 'Guide',
+          link: '/zh/guide/',
+        },
+        {
+          text: 'API Reference',
+          link: '/zh/api/',
+        },
+        {
+          text: 'Changelog',
+          link:
+            'https://github.com/vuejs/vue-router-next/blob/master/CHANGELOG.md',
+        },
+      ],
+
+      sidebar: [
+        {
+          text: 'Introduction',
+          link: '/zh/introduction.html',
+        },
+        {
+          text: 'Installation',
+          link: '/zh/installation.html',
+        },
+        {
+          text: 'Essentials',
+          collapsable: false,
+          children: [
+            {
+              text: 'Getting Started',
+              link: '/zh/guide/',
+            },
+            {
+              text: 'Dynamic Route Matching',
+              link: '/zh/guide/essentials/dynamic-matching.html',
+            },
+            {
+              text: "Routes' Matching Syntax",
+              link: '/zh/guide/essentials/route-matching-syntax.html',
+            },
+            {
+              text: 'Nested Routes',
+              link: '/zh/guide/essentials/nested-routes.html',
+            },
+            {
+              text: 'Programmatic Navigation',
+              link: '/zh/guide/essentials/navigation.html',
+            },
+            {
+              text: 'Named Routes',
+              link: '/zh/guide/essentials/named-routes.html',
+            },
+            {
+              text: 'Named Views',
+              link: '/zh/guide/essentials/named-views.html',
+            },
+            {
+              text: 'Redirect and Alias',
+              link: '/zh/guide/essentials/redirect-and-alias.html',
+            },
+            {
+              text: 'Passing Props to Route Components',
+              link: '/zh/guide/essentials/passing-props.html',
+            },
+            {
+              text: 'Different History modes',
+              link: '/zh/guide/essentials/history-mode.html',
+            },
+          ],
+        },
+        {
+          text: 'Advanced',
+          collapsable: false,
+          children: [
+            {
+              text: 'Navigation guards',
+              link: '/zh/guide/advanced/navigation-guards.html',
+            },
+            {
+              text: 'Route Meta Fields',
+              link: '/zh/guide/advanced/meta.html',
+            },
+            {
+              text: 'Data Fetching',
+              link: '/zh/guide/advanced/data-fetching.html',
+            },
+            {
+              text: 'Composition API',
+              link: '/zh/guide/advanced/composition-api.html',
+            },
+            {
+              text: 'Transitions',
+              link: '/zh/guide/advanced/transitions.html',
+            },
+            {
+              text: 'Scroll Behavior',
+              link: '/zh/guide/advanced/scroll-behavior.html',
+            },
+            {
+              text: 'Lazy Loading Routes',
+              link: '/zh/guide/advanced/lazy-loading.html',
+            },
+            {
+              text: 'Extending RouterLink',
+              link: '/zh/guide/advanced/extending-router-link.html',
+            },
+            {
+              text: 'Navigation Failures',
+              link: '/zh/guide/advanced/navigation-failures.html',
+            },
+            {
+              text: 'Dynamic Routing',
+              link: '/zh/guide/advanced/dynamic-routing.html',
+            },
+          ],
+        },
+        {
+          text: 'Migrating from Vue 2',
+          link: '/zh/guide/migration/index.html',
+        },
+      ],
     },
 
     // '/es/': {
