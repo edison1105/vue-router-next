@@ -1,6 +1,6 @@
-# Getting Started
+# 入门
 
-Creating a Single-page Application with Vue + Vue Router feels natural: with Vue.js, we are already composing our application with components. When adding Vue Router to the mix, all we need to do is map our components to the routes and let Vue Router know where to render them. Here's a basic example:
+用Vue+Vue Router创建单页应用感觉很自然：通过Vue.js，我们已经用组件组成了我们的应用。当加入Vue Router时，我们需要做的就是将我们的组件映射到路由上，让Vue Router知道在哪里渲染它们。下面是一个基本的例子：
 
 ## HTML
 
@@ -11,70 +11,70 @@ Creating a Single-page Application with Vue + Vue Router feels natural: with Vue
 <div id="app">
   <h1>Hello App!</h1>
   <p>
-    <!-- use the router-link component for navigation. -->
-    <!-- specify the link by passing the `to` prop. -->
-    <!-- `<router-link>` will render an `<a>` tag with the correct `href` attribute -->
+    <!--使用 router-link 组件进行导航 -->
+    <!--通过传递 `to` 来指定链接 -->
+    <!--`<router-link>` 将呈现一个带有正确 `href` 属性的 `<a>` 标签-->
     <router-link to="/">Go to Home</router-link>
     <router-link to="/about">Go to About</router-link>
   </p>
-  <!-- route outlet -->
-  <!-- component matched by the route will render here -->
+  <!-- 路由出口 -->
+  <!-- 路由匹配到的组件将渲染在这里 -->
   <router-view></router-view>
 </div>
 ```
 
 ### `router-link`
 
-Note how instead of using regular `a` tags, we use a custom component `router-link` to create links. This allows Vue Router to change the URL without reloading the page, handle URL generation as well as its encoding. We will see later how to benefit from these features.
+请注意，我们没有使用常规的 `a` 标签，而是使用一个自定义组件 `router-link` 来创建链接。这使得 Vue Router 可以在不重新加载页面的情况下更改 URL，处理 URL 的生成及其编码。我们将在后面看到如何从这些功能中获益。
 
 ### `router-view`
 
-`router-view` will display the component that corresponds to the url. You can put it anywhere to adapt it to your layout.
+`router-view` 将显示与 url 对应的组件。你可以把它放在任何地方，以适应你的布局。
 
 ## JavaScript
 
 ```js
-// 1. Define route components.
-// These can be imported from other files
+// 1. 定义路由组件.
+// 也可以从其他文件导入
 const Home = { template: '<div>Home</div>' }
 const About = { template: '<div>About</div>' }
 
-// 2. Define some routes
-// Each route should map to a component.
-// We'll talk about nested routes later.
+// 2. 定义一些路由
+// 每个路由都需要映射到一个组件。
+// 我们后面再讨论嵌套路由。
 const routes = [
   { path: '/', component: Home },
   { path: '/about', component: About },
 ]
 
-// 3. Create the router instance and pass the `routes` option
-// You can pass in additional options here, but let's
-// keep it simple for now.
+// 3. 创建路由器实例并传递 `routes` 配置
+// 你可以在这里输入更多的配置，但我们在这里
+// 暂时保持简单
 const router = VueRouter.createRouter({
-  // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
+  // 4. 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
   history: VueRouter.createWebHashHistory(),
-  routes, // short for `routes: routes`
+  routes, // `routes: routes` 的缩写
 })
 
-// 5. Create and mount the root instance.
+// 5. 创建并挂载根实例
 const app = Vue.createApp({})
-// Make sure to _use_ the router instance to make the
-// whole app router-aware.
+//确保 _use_ 路由器实例使
+//整个应用支持路由器。
 app.use(router)
 
 app.mount('#app')
 
-// Now the app has started!
+// 现在，应用已经启动了！
 ```
 
-By calling `app.use(router)`, we get access to it as `this.$router` as well as the current route as `this.$route` inside of any component:
+通过调用 `app.use(router)`，我们可以在任意组件中以 `this.$router` 的形式访问它，并且以 `this.$route` 的形式访问当前路由：
 
 ```js
 // Home.vue
 export default {
   computed: {
     username() {
-      // We will see what `params` is shortly
+      // 我们很快就会看到 `params` 是什么
       return this.$route.params.username
     },
   },
@@ -90,6 +90,6 @@ export default {
 }
 ```
 
-To access the router or the route inside the `setup` function, call the `useRouter` or `useRoute` functions. We will learn more about this in [the Composition API](/guide/advanced/composition-api.md#accessing-the-router-and-current-route-inside-setup)
+要在 `setup` 函数中访问路由，请调用 `useRouter` 或 `useRoute` 函数。我们将在 [Composition API](/zh/guide/advanced/composition-api.md#accessing-the-router-and-current-route-inside-setup) 中了解更多信息。
 
-Throughout the docs, we will often use the `router` instance. Keep in mind that `this.$router` is exactly the same as directly using the `router` instance created through `createRouter`. The reason we use `this.$router` is because we don't want to import the router in every single component that needs to manipulate routing.
+在整个文档中，我们会经常使用 `router` 实例，请记住，`this.$router` 与直接使用通过 `createRouter` 创建的 `router` 实例完全相同。我们使用 `this.$router` 的原因是，我们不想在每个需要操作路由的组件中都导入路由。

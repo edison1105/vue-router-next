@@ -1,12 +1,12 @@
-# Installation
+# 安装
 
-## Direct Download / CDN
+## 直接下载 / CDN
 
 [https://unpkg.com/vue-router@4](https://unpkg.com/vue-router@4)
 
 <!--email_off-->
 
-[Unpkg.com](https://unpkg.com) provides npm-based CDN links. The above link will always point to the latest release on npm. You can also use a specific version/tag via URLs like `https://unpkg.com/vue-router@3.0.0/dist/vue-router.js`.
+[Unpkg.com](https://unpkg.com) 提供了基于 npm 的 CDN 链接。上述链接将始终指向 npm 上的最新版本。 你也可以通过像 `https://unpkg.com/vue-router@3.0.0/dist/vue-router.js` 这样的URL来使用特定的版本。
 
 <!--/email_off-->
 
@@ -16,10 +16,9 @@
 npm install vue-router@4
 ```
 
-## Dev Build
+## 开发版本构建
 
-You will have to clone directly from GitHub and build `vue-router` yourself if
-you want to use the latest dev build.
+如果你想使用最新的开发版本,你需要直接从 GitHub 上克隆并自己构建`vue-router`。
 
 ```bash
 git clone https://github.com/vuejs/vue-router.git node_modules/vue-router
