@@ -1,6 +1,6 @@
 # 从 Vue2 迁移
 
-在 Vue Router API 从 v3（Vue2）到 v4（Vue3）的重写过程中，大部分的 Vue Router API 都没有变化，但是在迁移您的应用程序时，您可能会遇到一些破坏性的变化。本指南将帮助您了解为什么会发生这些变化，以及如何调整您的应用程序，使其与 Vue Router4 兼容。
+在 Vue Router API 从 v3（Vue2）到 v4（Vue3）的重写过程中，大部分的 Vue Router API 都没有变化，但是在迁移你的应用程序时，你可能会遇到一些破坏性的变化。本指南将帮助你了解为什么会发生这些变化，以及如何调整你的应用程序，使其与 Vue Router4 兼容。
 
 ## 破坏性变化
 
@@ -78,7 +78,7 @@ const routes = [
   // 这要归功于最后一个 *，意思是重复的参数，如果你
   // 打算直接使用未匹配的路径名称导航到该路径
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
-  // 如果您省略了最后的 `*`，在解析或推送时，params 中的 `/` 字符将被编码
+  // 如果你省略了最后的 `*`，在解析或跳转时，params 中的 `/` 字符将被编码
   { path: '/:pathMatch(.*)', name: 'bad-not-found', component: NotFound },
 ]
 // 如果使用命名路由，不好的例子：
@@ -94,7 +94,7 @@ router.resolve({
 ```
 
 :::tip
-如果你不打算直接使用未匹配的路由名称推送到该路由，就不需要为重复的参数添加 `*`。如果你调用 `router.push('/not/found/url')`，它将提供正确的 `pathMatch` 参数。
+如果你不打算直接使用未匹配的路由名称跳转到该路由，就不需要为重复的参数添加 `*`。如果你调用 `router.push('/not/found/url')`，它将提供正确的 `pathMatch` 参数。
 :::
 
 
@@ -216,13 +216,13 @@ router.currentRoute.value.matched.flatMap(record =>
 
 ```js
 app.use(router)
-// 注意：在服务器端，您需要手动推送初始地址。
+// 注意：在服务器端，你需要手动跳转到初始地址。
 router.isReady().then(() => app.mount('#app'))
 ```
 
 否则会有一个初始过渡，就像你提供了 `appear` 属性到 `transition` 一样，因为路由会显示它的初始地址（什么都没有），然后显示第一个地址。
 
-请注意，**如果在初始导航时有导航守卫**，你可能不想阻止应用程序渲染，直到它们被解析，除非您正在进行服务器端渲染。否则，在这种情况下，不等待路由准备好挂载应用会产生与Vue2 中相同的结果。
+请注意，**如果在初始导航时有导航守卫**，你可能不想阻止应用程序渲染，直到它们被解析，除非你正在进行服务器端渲染。否则，在这种情况下，不等待路由准备好挂载应用会产生与Vue2 中相同的结果。
 
 ### 删除 `router.app`
 
@@ -247,7 +247,7 @@ router.app = app
 </router-view>
 ```
 
-由于 `<router-view>` 引入了 `v-slot` API，您必须使用 `v-slot` API将其传递给 `<component>`：
+由于 `<router-view>` 引入了 `v-slot` API，你必须使用 `v-slot` API将其传递给 `<component>`：
 
 ```html
 <router-view v-slot="{ Component }">
@@ -318,7 +318,7 @@ createRouter({ routes: [] })
 
 ### 不存在的命名路由
 
-推送或解析不存在的命名路由会产生错误：
+跳转或解析不存在的命名路由会产生错误：
 
 ```js
 // 哎呀，我们的名字打错了
@@ -330,13 +330,13 @@ router.resolve({ name: 'homee' }) // 报错
 
 ### 命名路由缺少必要的 `params`
 
-在没有所需参数的情况下推送或解析命名路由，会产生错误：
+在没有所需参数的情况下跳转或解析命名路由，会产生错误：
 
 ```js
 // 给与以下路由:
 const routes = [{ path: '/users/:id', name: 'user', component: UserDetails }]
 
-// 缺少` id` 参数会失败
+// 缺少 `id` 参数会失败
 router.push({ name: 'user' })
 router.resolve({ name: 'user' })
 ```
