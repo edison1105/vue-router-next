@@ -1,17 +1,17 @@
-# Migrating from Vue 2
+# 从 Vue2 迁移
 
-Most of Vue Router API has remained unchanged during its rewrite from v3 (for Vue 2) to v4 (for Vue 3) but there are still a few breaking changes that you might encounter while migrating your application. This guide is here to help you understand why these changes happened and how to adapt your application to make it work with Vue Router 4.
+在 Vue Router API 从 v3（Vue2）到 v4（Vue3）的重写过程中，大部分的 Vue Router API 都没有变化，但是在迁移您的应用程序时，您可能会遇到一些破坏性的变化。本指南将帮助您了解为什么会发生这些变化，以及如何调整您的应用程序，使其与 Vue Router4 兼容。
 
-## Breaking Changes
+## 破坏性变化
 
-Changes are ordered by their usage. It is therefore recommended to follow this list in order.
+变更的顺序是按其用途排列的。因此，建议按照这个清单的顺序进行。
 
-### new Router becomes createRouter
+### new Router 变成 createRouter
 
-Vue Router is no longer a class but a set of functions. Instead of writing `new Router()`, you now have to call `createRouter`:
+Vue Router不再是一个类，而是一组函数。现在你不用再写 `new Router()`，而是要调用 `createRouter`:
 
 ```js
-// previously was
+// 以前是
 // import Router from 'vue-router'
 import { createRouter } from 'vue-router'
 
@@ -20,19 +20,19 @@ const router = createRouter({
 })
 ```
 
-### New `history` option to replace `mode`
+### 新的 `history` 配置取代 `mode`
 
-The `mode: 'history'` option has been replaced with a more flexible one named `history`. Depending on which mode you were using, you will have to replace it with the appropriate function:
+`mode: 'history'` 配置已经被一个更灵活的 `history` 配置所取代。根据你使用的模式，你必须用适当的函数替换它：
 
 - `"history"`: `createWebHistory()`
 - `"hash"`: `createWebHashHistory()`
 - `"abstract"`: `createMemoryHistory()`
 
-Here is a full snippet:
+下面是一个完整的片段：
 
 ```js
 import { createRouter, createWebHistory } from 'vue-router'
-// there is also createWebHashHistory and createMemoryHistory
+// 还有 createWebHashHistory 和 createMemoryHistory
 
 createRouter({
   history: createWebHistory(),
@@ -40,24 +40,25 @@ createRouter({
 })
 ```
 
-On SSR, you need to manually pass the appropriate history:
+在 SSR 上使用时，你需要手动传递相应的 history：
 
 ```js
 // router.js
 let history = isServer ? createMemoryHistory() : createWebHistory()
 let router = createRouter({ routes, history })
-// somewhere in your server-entry.js
-router.push(req.url) // request url
+// 在你的 server-entry.js 中的某个地方
+router.push(req.url) // 请求 url
 router.isReady().then(() => {
-  // resolve the request
+  // 处理请求
 })
 ```
 
-**Reason**: enable tree shaking of non used histories as well as implementing custom histories for advanced use cases like native solutions.
+**原因**：为未使用的 history 启用摇树，以及为高级用例（如原生解决方案）实现自定义 history。
 
 ### Moved the `base` option
+### 移动了 `base` 配置
 
-The `base` option is now passed as the first argument to `createWebHistory` (and other histories):
+现在，`base` 配置被作为 `createWebHistory` (和其他 history)的第一个参数传递：
 
 ```js
 import { createRouter, createWebHistory } from 'vue-router'
@@ -67,26 +68,26 @@ createRouter({
 })
 ```
 
-### Removed `*` (star or catch all) routes
+### 删除了 `*`（星标或包含全部）路由
 
-Catch all routes (`*`, `/*`) must now be defined using a parameter with a custom regex:
+现在必须使用自定义的 regex 参数来定义所有路由(`*`, `/*`)：
 
 ```js
 const routes = [
-  // pathMatch is the name of the param, e.g., going to /not/found yields
-  // { params: { pathMatch: ['not', 'found'] }}
-  // this is thanks to the last *, meaning repeated params and it is necessary if you
-  // plan on directly navigating to the not-found route using its name
+  // pathMatch 是参数的名称，例如，跳转到 /not/found 会得到
+  // { params: { params: { pathMatch: ['not', 'found'] }}
+  // 这要归功于最后一个 *，意思是重复的参数，如果你
+  // 打算直接使用未匹配的路径名称导航到该路径
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
-  // if you omit the last `*`, the `/` character in params will be encoded when resolving or pushing
+  // 如果您省略了最后的 `*`，在 resolving 或 pushing 时，params 中的 `/` 字符将被编码
   { path: '/:pathMatch(.*)', name: 'bad-not-found', component: NotFound },
 ]
-// bad example if using named routes:
+// 如果使用命名路由，不好的例子：
 router.resolve({
   name: 'bad-not-found',
   params: { pathMatch: 'not/found' },
 }).href // '/not%2Ffound'
-// good example:
+// 好的例子:
 router.resolve({
   name: 'not-found',
   params: { pathMatch: ['not', 'found'] },
@@ -94,38 +95,39 @@ router.resolve({
 ```
 
 :::tip
-You don't need to add the `*` for repeated params if you don't plan to directly push to the not found route using its name. If you call `router.push('/not/found/url')`, it will provide the right `pathMatch` param.
+如果你不打算直接使用未匹配的路由名称推送到该路由，就不需要为重复的参数添加 `*`。如果你调用 `router.push('/not/found/url')`，它将提供正确的 `pathMatch` 参数。
 :::
 
-**Reason**: Vue Router doesn't use `path-to-regexp` anymore, instead it implements its own parsing system that allows route ranking and enables dynamic routing. Since we usually add one single catch-all route per project, there is no big benefit in supporting a special syntax for `*`. The encoding of params is encoding across routes, without exception to make things easier to predict.
 
-### Replaced `onReady` with `isReady`
+**原因**：Vue Router 不再使用 `path-to-regexp`，而是实现了自己的解析系统，允许路由排序并实现动态路由。由于我们通常在每个项目中只添加一个单一的包罗万象的路由，所以支持 `*` 的特殊语法并没有太大的好处。参数的编码是跨路由的，毫无例外地让事情更容易预测。
 
-The existing `router.onReady()` function has been replaced with `router.isReady()` which doesn't take any argument and returns a Promise:
+### 将 `onReady` 改为 `isReady`
+
+现有的 `router.onReady()` 函数已被 `router.isReady()` 取代，该函数不接受任何参数并返回一个 Promise：
 
 ```js
-// replace
+// 将
 router.onReady(onSuccess, onError)
-// with
+// 替换成
 router.isReady().then(onSuccess).catch(onError)
-// or use await:
+// 或者使用 await:
 try {
   await router.isReady()
-  // onSuccess
+  // 成功
 } catch (err) {
-  // onError
+  // 报错
 }
 ```
 
-### `scrollBehavior` changes
+### `scrollBehavior` 的变化
 
-The object returned in `scrollBehavior` is now similar to [`ScrollToOptions`](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions): `x` is renamed to `left` and `y` is renamed to `top`. See [RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0035-router-scroll-position.md).
+`scrollBehavior` 中返回的对象与 [`ScrollToOptions`](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions) 类似：`x` 改名为 `left`，`y` 改名为 `top`。详见 [RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0035-router-scroll-position.md)。
 
-**Reason**: making the object similar to `ScrollToOptions` to make it feel more familiar with native JS APIs and potentially enable future new options.
+**原因**：使该对象类似于 `ScrollToOptions`，以使其感觉更像原生 JS API，并有可能启用未来的新配置。
 
-### `<router-view>`, `<keep-alive>`, and `<transition>`
+### `<router-view>`, `<keep-alive>`, 和 `<transition>`
 
-`transition` and `keep-alive` must now be used **inside** of `RouterView` via the `v-slot` API:
+`transition` 和 `keep-alive` 现在必须通过 `v-slot` API 在 `RouterView` **内部**使用：
 
 ```vue
 <router-view v-slot="{ Component }">
@@ -137,108 +139,108 @@ The object returned in `scrollBehavior` is now similar to [`ScrollToOptions`](ht
 </router-view>
 ```
 
-**Reason**: This was a necessary change. See the [related RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0034-router-view-keep-alive-transitions.md).
+**原因**: 这是一个必要的变更。详见 [related RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0034-router-view-keep-alive-transitions.md).
 
-### Removal of `append` prop in `<router-link>`
+### 删除 `<router-link>` 中的 `append` 属性
 
-The `append` prop has been removed from `<router-link>`. You can manually concatenate the value to an existing `path` instead:
+`<router-link>` 中的 `append` 属性已被删除。你可以手动将值设置到现有的 `path` 中：
 
 ```html
-replace
+将
 <router-link to="child-route" append>to relative child</router-link>
-with
+替换成
 <router-link :to="append($route.path, 'child-route')">
   to relative child
 </router-link>
 ```
 
-You must define a global `append` function on your _App_ instance:
+你必须在 _App_ 实例上定义一个全局的 `append` 函数：
 
 ```js
 app.config.globalProperties.append = (path, pathToAppend) =>
   path + (path.endsWith('/') ? '' : '/') + pathToAppend
 ```
 
-**Reason**: `append` wasn't used very often, is easy to replicate in user land.
+**原因**：`append` 使用频率不高，很容易在使用方仿制。
 
-### Removal of `event` and `tag` props in `<router-link>`
+### 删除 `<router-link>` 中的 `event` 和 `tag` 属性
 
-Both `event`, and `tag` props have been removed from `<router-link>`. You can use the [`v-slot` API](/api/#router-link-s-v-slot) to fully customize `<router-link>`:
+`<router-link>` 中的 `event` 和 `tag` 属性都已被删除。你可以使用 [`v-slot`API](/api/#router-link-s-v-slot) 来完全定制 `<router-link>`：
 
 ```html
-replace
+将
 <router-link to="/about" tag="span" event="dblclick">About Us</router-link>
-with
+替换成
 <router-link to="/about" custom v-slot="{ navigate }">
   <span @click="navigate" @keypress.enter="navigate" role="link">About Us</span>
 </router-link>
 ```
 
-**Reason**: These props were often used together to use something different from an `<a>` tag but were introduced before the `v-slot` API and are not used enough to justify adding to the bundle size for everybody.
+**原因**：这些道具经常一起使用，以使用与 `<a>` 标签不同的东西，但这些属性是在 `v-slot` API 之前引入的，而且没有足够的理由为所有人增加 bundle 包的大小。
 
-### Removal of the `exact` prop in `<router-link>`
+### 删除 `<router-link>` 中的 `exact` 属性
 
-The `exact` prop has been removed because the caveat it was fixing is no longer present so you should be able to safely remove it. There are however two things you should be aware of:
+`exact` 属性已被删除，因为不再存在要修复的警告，所以你应该能够安全地删除它。但，有两件事你应该注意：
 
-- Routes are now active based on the route records they represent instead of the generated route location objects and their `path`, `query`, and `hash` properties
-- Only the `path` section is matched, `query`, and `hash` aren't taken into account anymore
+- 路由现在是基于它们所代表的路由记录来激活的，而不是路由 location 对象及其 `path`、`query` 和 `hash` 属性来激活的
+- 只匹配 `path` 部分，`query` 和 `hash` 不再考虑
 
-If you wish to customize this behavior, e.g. take into account the `hash` section, you should use the [`v-slot` API](https://next.router.vuejs.org/api/#router-link-s-v-slot) to extend `<router-link>`.
+如果你想自定义这种行为，例如考虑到 `hash` 部分，你应该使用 [`v-slot` API](https://next.router.vuejs.org/api/#router-link-s-v-slot) 来扩展`<router-link>`。
 
-**Reason**: See the [RFC about active matching](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0028-router-active-link.md#summary) changes for more details.
+**原因**: 详见 [RFC about active matching](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0028-router-active-link.md#summary)。
 
-### Navigation guards in mixins are ignored
+### 忽略 mixins 中的导航守卫
 
-At the moment navigation guards in mixins are not supported. You can track its support at [vue-router#454](https://github.com/vuejs/vue-router-next/issues/454).
+目前不支持 mixins 中的导航守卫，你可以在 [vue-router#454](https://github.com/vuejs/vue-router-next/issues/454) 追踪它的支持情况。
 
-### Removal of `router.match` and changes to `router.resolve`
+### 删除 `router.match`，改为 `router.resolve`
 
-Both `router.match`, and `router.resolve` have been merged together into `router.resolve` with a slightly different signature. [Refer to the API](/api/#resolve) for more details.
+`router.match` 和 `router.resolve` 已合并到 `router.resolve` 中，签名略有不同。[详见 API](/zh/api/#resolve)。
 
-**Reason**: Uniting multiple methods that were used for the same purpose.
+**原因**：将用于同一目的的多种方法统一起来。
 
-### Removal of `router.getMatchedComponents()`
 
-The method `router.getMatchedComponents` is now removed as matched components can be retrieved from `router.currentRoute.value.matched`:
+### 删除 `router.getMatchedComponents()`
 
+`router.getMatchedComponents` 方法现在被删除，因为匹配的组件可以从 `router.currentRoute.value.mixed` 中获取：
 ```js
 router.currentRoute.value.matched.flatMap(record =>
   Object.values(record.components)
 )
 ```
 
-**Reason**: This method was only used during SSR and is a one liner that can be done by the user.
+**原因**：这个方法只在 SSR 中使用，而且是一种单行线，可由用户完成。
 
-### **All** navigations are now always asynchronous
+### **所有**的导航现在总是异步的
 
-All navigations, including the first one, are now asynchronous, meaning that, if you use a `transition`, you may need to wait for the router to be _ready_ before mounting the app:
+所有的导航，包括第一个导航，现在都是异步的，这意味着，如果你使用一个 `transition`，你可能需要等待路由 _ready_ 好后再挂载应用程序：
 
 ```js
 app.use(router)
-// Note: on Server Side, you need to manually push the initial location
+// 注意：在服务器端，您需要手动推送初始 location。
 router.isReady().then(() => app.mount('#app'))
 ```
 
-Otherwise there will be an initial transition as if you provided the `appear` prop to `transition` because the router displays its initial location (nothing) and then displays the first location.
+否则会有一个初始过渡，就像你提供了 `appear` 属性到 `transition` 一样，因为路由会显示它的初始 location（什么都没有），然后显示第一个位置。
 
-Note that **if you have navigation guards upon the initial navigation**, you might not want to block the app render until they are resolved unless you are doing Server Side Rendering. In this scenario, not waiting the router to be ready to mount the app would yield the same result as in Vue 2.
+请注意，**如果在初始导航时有导航守卫**，你可能不想阻止应用程序渲染，直到它们被解析，除非您正在进行服务器端渲染。否则，在这种情况下，不等待路由准备好挂载应用会产生与Vue2 中相同的结果。
 
-### Removal of `router.app`
+### 删除 `router.app`
 
-`router.app` used to represent the last root component (Vue instance) that injected the router. Vue Router can now be safely used by multiple Vue applications at the same time. You can still add it when using the router:
+`router.app` 用于表示注入路由的最后一个根组件（Vue实例）。Vue Router 现在可以被多个 Vue 应用程序同时安全使用。你仍然可以在使用路由时添加它：
 
 ```js
 app.use(router)
 router.app = app
 ```
 
-You can also extend the TypeScript definition of the `Router` interface to add the `app` property.
+你也可以扩展 `Router` 接口的 TypeScript 定义来添加 `app` 属性。
 
-**Reason**: Vue 3 applications do not exist in Vue 2 and now we property support multiple applications using the same Router instance, so having an `app` property would have been misleading because it would have been the application instead of the root instance.
+**原因**：Vue3 写的程序不能在 Vue2 中使用，现在我们使用同一 Router 实例来支持多个应用程序，因此拥有 `app` 属性可能会产生误导，因为它本来是应用程序而不是根实例。 
 
-### Passing content to route components' `<slot>`
+### 将内容传递给路由组件 `<slot>`
 
-Before you could directly pass a template to be rendered by a route components' `<slot>` by nesting it under a `<router-view>` component:
+之前你可以直接传递一个模板，通过嵌套在 `<router-view>` 组件下，由路由组件的 `<slot>` 来渲染：
 
 ```html
 <router-view>
@@ -246,7 +248,7 @@ Before you could directly pass a template to be rendered by a route components' 
 </router-view>
 ```
 
-Because of the introduction of the `v-slot` api for `<router-view>`, you must pass it to the `<component>` using the `v-slot` API:
+由于 `<router-view>` 引入了 `v-slot` API，您必须使用 `v-slot` API将其传递给 `<component>`：
 
 ```html
 <router-view v-slot="{ Component }">
@@ -256,95 +258,95 @@ Because of the introduction of the `v-slot` api for `<router-view>`, you must pa
 </router-view>
 ```
 
-### Removal of `parent` from route locations
+### 将 `parent` 从路由 location 中删除
 
-The `parent` property has been removed from normalized route locations (`this.$route` and object returned by `router.resolve`). You can still access it via the `matched` array:
+`parent` 属性已从标准化路由 location (`this.$route` 和 `router.resolve` 返回的对象) 中删除。你仍然可以通过 `matched` 数组访问它：
 
 ```js
 const parent = this.$route.matched[this.$route.matched.length - 2]
 ```
 
-**Reason**: Having `parent` and `children` creates unnecessary circular references while the properties could be retrieved already through `matched`.
+**原因**：同时存在 `parent` 和 `children` 会造成不必要的循环引用，而属性可以通过 `matched` 来检索。
 
-### Removal of `pathToRegexpOptions`
+### 删除 `pathToRegexpOptions`
 
-The `pathToRegexpOptions` and `caseSensitive` properties of route records have been replaced with `sensitive` and `strict` options for `createRouter()`. They can now also be directly passed when creating the router with `createRouter()`. Any other option specific to `path-to-regexp` has been removed as `path-to-regexp` is no longer used to parse paths.
+路由的 `pathToRegexpOptions` 和 `caseSensitive` 属性已被 `createRouter()` 的 `sensitive` 和 `strict` 配置取代。现在，当使用 `createRouter()` 创建路由时，它们也可以直接传递。`path-to-regexp` 的任何其他特定配置已被删除，因为 `path-to-regexp` 已不再用于解析路径。
 
-### Removal of unnamed parameters
+### 删除未命名的参数
 
-Due to the removal of `path-to-regexp`, unnamed parameters are no longer supported:
+由于取消了 `path-to-regexp`，所以不再支持未命名的参数：
 
 - `/foo(/foo)?/suffix` becomes `/foo/:_(foo)?/suffix`
 - `/foo(foo)?` becomes `/foo:_(foo)?`
 - `/foo/(.*)` becomes `/foo/:_(.*)`
 
 :::tip
-Note you can use any name instead of `_` for the param. The point is to provide one.
+请注意，你可以使用任何名称代替 `_` 作为参数。重点是要提供一个名字。
 :::
 
-### Usage of `history.state`
+### `history.state` 的用法
 
-Vue Router saves information on the `history.state`. If you have any code manually calling `history.pushState()`, you should likely avoid it or refactor it with a regular `router.push()` and a `history.replaceState()`:
+Vue Router 将信息保存在 `history.state` 上。如果你有任何手动调用 `history.pushState()` 的代码，你应该避免它，或者用的 `router.push()` 和 `history.replaceState()` 进行重构：
 
 ```js
-// replace
+// 将
 history.pushState(myState, '', url)
-// with
+// 替换成
 await router.push(url)
 history.replaceState({ ...history.state, ...myState }, '')
 ```
 
-Similarly, if you were calling `history.replaceState()` without preserving the current state, you will need to pass the current `history.state`:
+同样，如果你在调用 `history.replaceState()` 时没有保留当前状态，你需要传递当前 `history.state`：
 
 ```js
-// replace
+// 将
 history.replaceState({}, '', url)
-// with
+// 替换成
 history.replaceState(history.state, '', url)
 ```
 
-**Reason**: We use the history state to save information about the navigation like the scroll position, previous location, etc.
+**原因**：我们使用历史状态来保存导航信息，如滚动位置，以前的 location 等。
 
-### `routes` option is required in `options`
+### `options` 中需要配置 `routes` 
 
-The property `routes` is now required in `options`.
+`options` 中的 `routes` 属性现在是必需的。
 
 ```js
 createRouter({ routes: [] })
 ```
 
-**Reason**: The router is designed to be created with routes even though you can add them later on. You need at least one route in most scenarios and this is written once per app in general.
+**原因**：路由的设计是为了创建路由，尽管你可以在以后添加它们。在大多数情况下，你至少需要一条路由，一般每个应用都会写一次。
 
-### Non existent named routes
+### 不存在的命名路由
 
-Pushing or resolving a non existent named route throws an error:
+推送或解析不存在的命名路由会产生错误：
 
 ```js
-// Oops, we made a typo in name
-router.push({ name: 'homee' }) // throws
-router.resolve({ name: 'homee' }) // throws
+// 哎呀，我们的名字打错了
+router.push({ name: 'homee' }) // 报错
+router.resolve({ name: 'homee' }) // 报错
 ```
 
-**Reason**: Previously, the router would navigate to `/` but display nothing (instead of the home page). Throwing an error makes more sense because we cannot produce a valid URL to navigate to.
+**原因**：以前，路由器会导航到 `/`，但不显示任何内容（而不是主页）。抛出一个错误更有意义，因为我们不能产生一个有效的 URL 来导航
 
-### Missing required `params` on named routes
+### 命名路由缺少必要的 `params`
 
-Pushing or resolving a named route without its required params will throw an error:
+在没有所需参数的情况下推送或解析命名路由，会产生错误：
 
 ```js
-// given the following route:
+// 给与以下路由:
 const routes = [{ path: '/users/:id', name: 'user', component: UserDetails }]
 
-// Missing the `id` param will fail
+// 缺少` id` 参数会失败
 router.push({ name: 'user' })
 router.resolve({ name: 'user' })
 ```
 
-**Reason**: Same as above.
+**原因**：同上.
 
-### Named children routes with an empty `path` no longer appends a slash
+### 名称为空的子路由不再添加斜杠
 
-Given any nested named route with an empty `path`:
+给予任何空 `path` 的嵌套命名路由：
 
 ```js
 const routes = [
@@ -360,13 +362,13 @@ const routes = [
 ]
 ```
 
-Navigating or resolving to the named route `dashboard` will now produce a URL **without a trailing slash**:
+现在，导航或解析到命名的路由 `dashboard` 时，会产生一个**不带斜线的 URL **：
 
 ```js
 router.resolve({ name: 'dashboard' }).href // '/dashboard'
 ```
 
-This has an important side effect about children `redirect` records like these:
+这对子级 `redirect` 有重要的副作用，如下所示：
 
 ```js
 const routes = [
@@ -374,7 +376,7 @@ const routes = [
     path: '/parent',
     component: Parent,
     children: [
-      // this would now redirect to `/home` instead of `/parent/home`
+      // 现在将重定向到 `/home` 而不是 `/parent/home`
       { path: '', redirect: 'home' },
       { path: 'home', component: Home },
     ],
@@ -382,30 +384,29 @@ const routes = [
 ]
 ```
 
-Note this will work if `path` was `/parent/` as the relative location `home` to `/parent/` is indeed `/parent/home` but the relative location of `home` to `/parent` is `/home`.
+请注意，如果 `path` 是 `/parent/`，这也可以，因为 `home` 到 `/parent/` 的相对位置确实是 `/parent/home`，但 `home` 到 `/parent` 的相对位置是 `/home`。
 
 <!-- Learn more about relative links [in the cookbook](/cookbook/relative-links.md). -->
 
-**Reason**: This is to make trailing slash behavior consistent: by default all routes allow a trailing slash. It can be disabled by using the `strict` option and manually appending (or not) a slash to the routes.
+**原因**：这是为了使尾部的斜线行为保持一致：默认情况下，所有路由都允许使用尾部的斜线。可以通过使用 `strict` 配置和手动添加(或不添加)斜杠到路由中来禁用。
 
 <!-- TODO: maybe a cookbook entry -->
 
-### `$route` properties Encoding
+### `$route` 属性编码
 
-Decoded values in `params`, `query`, and `hash` are now consistent no matter where the navigation is initiated (older browsers will still produce unencoded `path` and `fullPath`). The initial navigation should yield the same results as in-app navigations.
+无论在哪里启动导航，`params`、`query`和 `hash` 中的解码值现在都是一致的（旧的浏览器仍然会产生未编码的 `path` 和 `fullPath`）。初始导航应产生与应用内导航相同的结果。
 
-Given any [normalized route location](/api/#routelocationnormalized):
+给定任何 [规范化的路由 location](/zh/api/#routelocationnormalized):
 
-- Values in `path`, `fullPath` are not decoded anymore. They will appear as provided by the browser (most browsers provide them encoded). e.g. directly writing on the address bar `https://example.com/hello world` will yield the encoded version: `https://example.com/hello%20world` and both `path` and `fullPath` will be `/hello%20world`.
-- `hash` is now decoded, that way it can be copied over: `router.push({ hash: $route.hash })` and be used directly in [scrollBehavior](/api/#scrollbehavior)'s `el` option.
-- When using `push`, `resolve`, and `replace` and providing a `string` location or a `path` property in an object, **it must be encoded** (like in the previous version). On the other hand, `params`, `query` and `hash` must be provided in its unencoded version.
-- The slash character (`/`) is now properly decoded inside `params` while still producing an encoded version on the URL: `%2F`.
+- `hash` 现在被解码了，这样就可以复制过来。`router.push({ hash: $route.hash })` 可以直接用于 [scrollBehavior](/zh/api/#scrollbehavior) 的 `el` 选项中。
+- 当使用 `push`、`resolve` 和 `replace` 并在对象中提供 `string` location 或 `path` 属性时，**必须进行编码**(像以前的版本一样)。另一方面，`params`、`query` 和 `hash` 必须以未编码的版本提供。
+- 斜杠字符(`/`)现在已在 `params` 内正确解码，同时仍在 URL 上产生一个编码版本：`%2F`。
 
-**Reason**: This allows to easily copy existing properties of a location when calling `router.push()` and `router.resolve()`, and make the resulting route location consistent across browsers. `router.push()` is now idempotent, meaning that calling `router.push(route.fullPath)`, `router.push({ hash: route.hash })`, `router.push({ query: route.query })`, and `router.push({ params: route.params })` will not create extra encoding.
+**原因**：这样，在调用 `router.push()` 和 `router.resolve()` 时，可以很容易地复制一个位置的现有属性，并使产生的路由位置在各浏览器之间保持一致。`router.push()` 现在是幂等的，这意味着调用 `router.push(route.fullPath)`、`router.push({ hash: route.hash })`、`router.push({ query: route.query })` 和`router.push({ params: route.params })` 不会产生额外的编码。
 
-### TypeScript changes
+### TypeScript 变更
 
-To make typings more consistent and expressive, some types have been renamed:
+为了使类型更一致，更有表现力，有些类型被重新命名：
 
 | `vue-router@3` | `vue-router@4`          |
 | -------------- | ----------------------- |
@@ -413,10 +414,10 @@ To make typings more consistent and expressive, some types have been renamed:
 | Location       | RouteLocation           |
 | Route          | RouteLocationNormalized |
 
-## New Features
+## 新功能
 
-Some of new features to keep an eye on in Vue Router 4 include:
+Vue Router4 中需要关注的一些新功能包括：
 
-- [Dynamic Routing](/api/#addroute-2)
-- [Composition API](/guide/advanced/composition-api.md)
+- [动态路由](/zh/api/#addroute-2)
+- [组合式 API](/zh/guide/advanced/composition-api.md)
 <!-- - Custom History implementation -->

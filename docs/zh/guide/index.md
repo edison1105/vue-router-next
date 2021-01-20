@@ -47,7 +47,7 @@ const routes = [
   { path: '/about', component: About },
 ]
 
-// 3. 创建路由器实例并传递 `routes` 配置
+// 3. 创建路由实例并传递 `routes` 配置
 // 你可以在这里输入更多的配置，但我们在这里
 // 暂时保持简单
 const router = VueRouter.createRouter({
@@ -58,8 +58,8 @@ const router = VueRouter.createRouter({
 
 // 5. 创建并挂载根实例
 const app = Vue.createApp({})
-//确保 _use_ 路由器实例使
-//整个应用支持路由器。
+//确保 _use_ 路由实例使
+//整个应用支持路由。
 app.use(router)
 
 app.mount('#app')
