@@ -78,7 +78,7 @@ const routes = [
   // 这要归功于最后一个 *，意思是重复的参数，如果你
   // 打算直接使用未匹配的路径名称导航到该路径
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
-  // 如果您省略了最后的 `*`，在 resolving 或 pushing 时，params 中的 `/` 字符将被编码
+  // 如果您省略了最后的 `*`，在解析或推送时，params 中的 `/` 字符将被编码
   { path: '/:pathMatch(.*)', name: 'bad-not-found', component: NotFound },
 ]
 // 如果使用命名路由，不好的例子：
@@ -181,7 +181,7 @@ app.config.globalProperties.append = (path, pathToAppend) =>
 
 `exact` 属性已被删除，因为不再存在要修复的警告，所以你应该能够安全地删除它。但，有两件事你应该注意：
 
-- 路由现在是基于它们所代表的路由记录来激活的，而不是路由 location 对象及其 `path`、`query` 和 `hash` 属性来激活的
+- 路由现在是基于它们所代表的路由记录来激活的，而不是路由地址对象及其 `path`、`query` 和 `hash` 属性来激活的
 - 只匹配 `path` 部分，`query` 和 `hash` 不再考虑
 
 如果你想自定义这种行为，例如考虑到 `hash` 部分，你应该使用 [`v-slot` API](https://next.router.vuejs.org/api/#router-link-s-v-slot) 来扩展`<router-link>`。
@@ -216,11 +216,11 @@ router.currentRoute.value.matched.flatMap(record =>
 
 ```js
 app.use(router)
-// 注意：在服务器端，您需要手动推送初始 location。
+// 注意：在服务器端，您需要手动推送初始地址。
 router.isReady().then(() => app.mount('#app'))
 ```
 
-否则会有一个初始过渡，就像你提供了 `appear` 属性到 `transition` 一样，因为路由会显示它的初始 location（什么都没有），然后显示第一个位置。
+否则会有一个初始过渡，就像你提供了 `appear` 属性到 `transition` 一样，因为路由会显示它的初始地址（什么都没有），然后显示第一个地址。
 
 请注意，**如果在初始导航时有导航守卫**，你可能不想阻止应用程序渲染，直到它们被解析，除非您正在进行服务器端渲染。否则，在这种情况下，不等待路由准备好挂载应用会产生与Vue2 中相同的结果。
 
@@ -257,9 +257,9 @@ router.app = app
 </router-view>
 ```
 
-### 将 `parent` 从路由 location 中删除
+### 将 `parent` 从路由地址中删除
 
-`parent` 属性已从标准化路由 location (`this.$route` 和 `router.resolve` 返回的对象) 中删除。你仍然可以通过 `matched` 数组访问它：
+`parent` 属性已从标准化路由地址（`this.$route` 和 `router.resolve` 返回的对象）中删除。你仍然可以通过 `matched` 数组访问它：
 
 ```js
 const parent = this.$route.matched[this.$route.matched.length - 2]
@@ -304,7 +304,7 @@ history.replaceState({}, '', url)
 history.replaceState(history.state, '', url)
 ```
 
-**原因**：我们使用历史状态来保存导航信息，如滚动位置，以前的 location 等。
+**原因**：我们使用历史状态来保存导航信息，如滚动位置，以前的地址等。
 
 ### `options` 中需要配置 `routes` 
 
@@ -383,7 +383,7 @@ const routes = [
 ]
 ```
 
-请注意，如果 `path` 是 `/parent/`，这也可以，因为 `home` 到 `/parent/` 的相对位置确实是 `/parent/home`，但 `home` 到 `/parent` 的相对位置是 `/home`。
+请注意，如果 `path` 是 `/parent/`，这也可以，因为 `home` 到 `/parent/` 的相对地址确实是 `/parent/home`，但 `home` 到 `/parent` 的相对地址是 `/home`。
 
 <!-- Learn more about relative links [in the cookbook](/cookbook/relative-links.md). -->
 
@@ -395,13 +395,13 @@ const routes = [
 
 无论在哪里启动导航，`params`、`query`和 `hash` 中的解码值现在都是一致的（旧的浏览器仍然会产生未编码的 `path` 和 `fullPath`）。初始导航应产生与应用内导航相同的结果。
 
-给定任何 [规范化的路由 location](/zh/api/#routelocationnormalized):
+给定任何 [规范化的路由地址](/zh/api/#routelocationnormalized):
 
 - `hash` 现在被解码了，这样就可以复制过来。`router.push({ hash: $route.hash })` 可以直接用于 [scrollBehavior](/zh/api/#scrollbehavior) 的 `el` 选项中。
-- 当使用 `push`、`resolve` 和 `replace` 并在对象中提供 `string` location 或 `path` 属性时，**必须进行编码**(像以前的版本一样)。另一方面，`params`、`query` 和 `hash` 必须以未编码的版本提供。
+- 当使用 `push`、`resolve` 和 `replace` 并在对象中提供 `string` 地址或 `path` 属性时，**必须进行编码**(像以前的版本一样)。另一方面，`params`、`query` 和 `hash` 必须以未编码的版本提供。
 - 斜杠字符(`/`)现在已在 `params` 内正确解码，同时仍在 URL 上产生一个编码版本：`%2F`。
 
-**原因**：这样，在调用 `router.push()` 和 `router.resolve()` 时，可以很容易地复制一个位置的现有属性，并使产生的路由位置在各浏览器之间保持一致。`router.push()` 现在是幂等的，这意味着调用 `router.push(route.fullPath)`、`router.push({ hash: route.hash })`、`router.push({ query: route.query })` 和`router.push({ params: route.params })` 不会产生额外的编码。
+**原因**：这样，在调用 `router.push()` 和 `router.resolve()` 时，可以很容易地复制一个地址的现有属性，并使产生的路由地址在各浏览器之间保持一致。`router.push()` 现在是幂等的，这意味着调用 `router.push(route.fullPath)`、`router.push({ hash: route.hash })`、`router.push({ query: route.query })` 和`router.push({ params: route.params })` 不会产生额外的编码。
 
 ### TypeScript 变化
 
