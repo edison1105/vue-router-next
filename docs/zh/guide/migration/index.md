@@ -4,11 +4,11 @@
 
 ## 破坏性变化
 
-变更的顺序是按其用途排列的。因此，建议按照这个清单的顺序进行。
+变化的顺序是按其用途排列的。因此，建议按照这个清单的顺序进行。
 
 ### new Router 变成 createRouter
 
-Vue Router不再是一个类，而是一组函数。现在你不用再写 `new Router()`，而是要调用 `createRouter`:
+Vue Router 不再是一个类，而是一组函数。现在你不用再写 `new Router()`，而是要调用 `createRouter`:
 
 ```js
 // 以前是
@@ -55,7 +55,6 @@ router.isReady().then(() => {
 
 **原因**：为未使用的 history 启用摇树，以及为高级用例（如原生解决方案）实现自定义 history。
 
-### Moved the `base` option
 ### 移动了 `base` 配置
 
 现在，`base` 配置被作为 `createWebHistory` (和其他 history)的第一个参数传递：
@@ -125,7 +124,7 @@ try {
 
 **原因**：使该对象类似于 `ScrollToOptions`，以使其感觉更像原生 JS API，并有可能启用未来的新配置。
 
-### `<router-view>`, `<keep-alive>`, 和 `<transition>`
+### `<router-view>`、`<keep-alive>` 和 `<transition>`
 
 `transition` 和 `keep-alive` 现在必须通过 `v-slot` API 在 `RouterView` **内部**使用：
 
@@ -139,7 +138,7 @@ try {
 </router-view>
 ```
 
-**原因**: 这是一个必要的变更。详见 [related RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0034-router-view-keep-alive-transitions.md).
+**原因**: 这是一个必要的变化。详见 [related RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0034-router-view-keep-alive-transitions.md).
 
 ### 删除 `<router-link>` 中的 `append` 属性
 
@@ -176,7 +175,7 @@ app.config.globalProperties.append = (path, pathToAppend) =>
 </router-link>
 ```
 
-**原因**：这些道具经常一起使用，以使用与 `<a>` 标签不同的东西，但这些属性是在 `v-slot` API 之前引入的，而且没有足够的理由为所有人增加 bundle 包的大小。
+**原因**：这些属性经常一起使用，以使用与 `<a>` 标签不同的东西，但这些属性是在 `v-slot` API 之前引入的，而且没有足够的理由为所有人增加 bundle 包的大小。
 
 ### 删除 `<router-link>` 中的 `exact` 属性
 
@@ -193,7 +192,7 @@ app.config.globalProperties.append = (path, pathToAppend) =>
 
 目前不支持 mixins 中的导航守卫，你可以在 [vue-router#454](https://github.com/vuejs/vue-router-next/issues/454) 追踪它的支持情况。
 
-### 删除 `router.match`，改为 `router.resolve`
+### 删除 `router.match` 改为 `router.resolve`
 
 `router.match` 和 `router.resolve` 已合并到 `router.resolve` 中，签名略有不同。[详见 API](/zh/api/#resolve)。
 
@@ -276,9 +275,9 @@ const parent = this.$route.matched[this.$route.matched.length - 2]
 
 由于取消了 `path-to-regexp`，所以不再支持未命名的参数：
 
-- `/foo(/foo)?/suffix` becomes `/foo/:_(foo)?/suffix`
-- `/foo(foo)?` becomes `/foo:_(foo)?`
-- `/foo/(.*)` becomes `/foo/:_(.*)`
+- `/foo(/foo)?/suffix` 变成 `/foo/:_(foo)?/suffix`
+- `/foo(foo)?` 变成 `/foo:_(foo)?`
+- `/foo/(.*)` 变成 `/foo/:_(.*)`
 
 :::tip
 请注意，你可以使用任何名称代替 `_` 作为参数。重点是要提供一个名字。
@@ -342,7 +341,7 @@ router.push({ name: 'user' })
 router.resolve({ name: 'user' })
 ```
 
-**原因**：同上.
+**原因**：同上。
 
 ### 名称为空的子路由不再添加斜杠
 
@@ -362,7 +361,7 @@ const routes = [
 ]
 ```
 
-现在，导航或解析到命名的路由 `dashboard` 时，会产生一个**不带斜线的 URL **：
+现在，导航或解析到命名的路由 `dashboard` 时，会产生一个**不带斜线的 URL**：
 
 ```js
 router.resolve({ name: 'dashboard' }).href // '/dashboard'
@@ -404,7 +403,7 @@ const routes = [
 
 **原因**：这样，在调用 `router.push()` 和 `router.resolve()` 时，可以很容易地复制一个位置的现有属性，并使产生的路由位置在各浏览器之间保持一致。`router.push()` 现在是幂等的，这意味着调用 `router.push(route.fullPath)`、`router.push({ hash: route.hash })`、`router.push({ query: route.query })` 和`router.push({ params: route.params })` 不会产生额外的编码。
 
-### TypeScript 变更
+### TypeScript 变化
 
 为了使类型更一致，更有表现力，有些类型被重新命名：
 
