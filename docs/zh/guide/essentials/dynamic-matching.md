@@ -1,22 +1,22 @@
-# Dynamic Route Matching with Params
+# 带参数的动态路由匹配
 
-Very often we will need to map routes with the given pattern to the same component. For example we may have a `User` component which should be rendered for all users but with different user IDs. In Vue Router we can use a dynamic segment in the path to achieve that, we call that a _param_:
+很多时候，我们需要将给定匹配模式的路由映射到同一个组件。例如，我们可能有一个 `User` 组件，它应该对所有用户进行渲染，但用户 ID 不同。在 Vue Router 中，我们可以在路径中使用一个动态段来实现，我们称之为 _路径参数_ ：
 
 ```js
 const User = {
   template: '<div>User</div>',
 }
 
-// these are passed to `createRouter`
+// 这些都会传递给 `createRouter`
 const routes = [
-  // dynamic segments start with a colon
+  // 动态段以冒号开始
   { path: '/users/:id', component: User },
 ]
 ```
 
-Now URLs like `/users/johnny` and `/users/jolyne` will both map to the same route.
+现在像 `/users/johnny` 和 `/users/jolyne` 这样的 URL 都会映射到同一个路由。
 
-A _param_ is denoted by a colon `:`. When a route is matched, the value of its _params_ will be exposed as `this.$route.params` in every component. Therefore, we can render the current user ID by updating `User`'s template to this:
+_路径参数_ 用冒号 `:` 表示。当一个路由被匹配时，它的 _params_ 的值将在每个组件中以 `this.$route.params` 的形式暴露出来。因此，我们可以通过更新 `User` 的模板来呈现当前的用户 ID：
 
 ```js
 const User = {
@@ -24,16 +24,16 @@ const User = {
 }
 ```
 
-You can have multiple _params_ in the same route, and they will map to corresponding fields on `$route.params`. Examples:
+你可以在同一个路由中设置有多个 _路径参数_ ，它们会映射到 `$route.params` 上的相应字段。例如：
 
-| pattern                        | matched path             | \$route.params                           |
+| 匹配模式                        | 匹配路径                  | \$route.params                           |
 | ------------------------------ | ------------------------ | ---------------------------------------- |
 | /users/:username               | /users/eduardo           | `{ username: 'eduardo' }`                |
 | /users/:username/posts/:postId | /users/eduardo/posts/123 | `{ username: 'eduardo', postId: '123' }` |
 
-In addition to `$route.params`, the `$route` object also exposes other useful information such as `$route.query` (if there is a query in the URL), `$route.hash`, etc. You can check out the full details in the [API Reference](/api/#routelocationnormalized).
+除了 `$route.params` 之外，`$route` 对象还公开了其他有用的信息，如 `$route.query`（如果 URL 中存在参数）、`$route.hash` 等。你可以在 [API 参考](/zh/api/#routelocationnormalized) 中查看完整的细节。
 
-A working demo of this example can be found [here](https://codesandbox.io/s/route-params-vue-router-examples-mlb14?from-embed&initialpath=%2Fusers%2Feduardo%2Fposts%2F1).
+这个例子的 demo 可以在[这里](https://codesandbox.io/s/route-params-vue-router-examples-mlb14?from-embed&initialpath=%2Fusers%2Feduardo%2Fposts%2F1)找到。
 
 <!-- <iframe
   src="https://codesandbox.io/embed//route-params-vue-router-examples-mlb14?fontsize=14&theme=light&view=preview&initialpath=%2Fusers%2Feduardo%2Fposts%2F1"
@@ -43,11 +43,11 @@ A working demo of this example can be found [here](https://codesandbox.io/s/rout
   sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
 ></iframe> -->
 
-## Reacting to Params Changes
+## 响应路由参数的变化
 
-One thing to note when using routes with params is that when the user navigates from `/users/johnny` to `/users/jolyne`, **the same component instance will be reused**. Since both routes render the same component, this is more efficient than destroying the old instance and then creating a new one. **However, this also means that the lifecycle hooks of the component will not be called**.
+使用带有参数的路由时需要注意的是，当用户从 `/users/johnny` 导航到 `/users/jolyne` 时，**相同的组件实例将被重复使用**。因为两个路由都渲染同个组件，比起销毁再创建，复用则显得更加高效。**不过，这也意味着组件的生命周期钩子不会被调用**。
 
-To react to params changes in the same component, you can simply watch anything on the `$route` object, in this scenario, the `$route.params`:
+要对同一个组件中参数的变化做出响应的话，你可以简单地 watch `$route` 对象上的任意属性，在这个场景中，就是 `$route.params` ：
 
 ```js
 const User = {
@@ -56,39 +56,39 @@ const User = {
     this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
-        // react to route changes...
+        // 对路由变化做出响应...
       }
     )
   },
 }
 ```
 
-Or, use the `beforeRouteUpdate` [navigation guard](../advanced/navigation-guards.md), which also allows to cancel the navigation:
+或者，使用 `beforeRouteUpdate` [导航守卫](.../zh/advanced/navigation-guards.md)，它也可以取消导航：
 
 ```js
 const User = {
   template: '...',
   async beforeRouteUpdate(to, from) {
-    // react to route changes...
+    // 对路由变化做出响应...
     this.userData = await fetchUser(to.params.id)
   },
 }
 ```
 
-## Catch all / 404 Not found Route
+## 捕获所有路由或 404 Not found 路由
 
-Regular params will only match characters in between url fragments, separated by `/`. If we want to match **anything**, we can use a custom _param_ regexp by adding the regexp inside parentheses right after the _param_:
+常规参数只匹配 url 片段之间的字符，用 `/` 分隔。如果我们想匹配**任意路径**，我们可以使用自定义的 _路径参数_ 正则表达式，在 _路径参数_ 后面的括号中加入 正则表达式 :
 
 ```js
 const routes = [
-  // will match everything and put it under `$route.params.pathMatch`
+  // 将匹配所有内容并将其放在 `$route.params.pathMatch` 下
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
-  // will match anything starting with `/user-` and put it under `$route.params.afterUser`
+  // 将匹配以 `/user-` 开头的所有内容，并将其放在 `$route.params.afterUser` 下
   { path: '/user-:afterUser(.*)', component: UserGeneric },
 ]
 ```
 
-In this specific scenario we are using a [custom regexp](/guide/essentials/route-matching-syntax.md#custom-regexp-in-params) between parentheses and marking the `pathMatch` param as [optionally repeatable](/guide/essentials/route-matching-syntax.md#optional-parameters). This is to allows us to directly navigate to the route if we need to by splitting the `path` into an array:
+在这个特定的场景中，我们在括号之间使用了[自定义正则表达式](/zh/guide/essentials/route-matching-syntax.md#custom-regexp-in-params)，并将`pathMatch` 参数标记为[可选可重复](/zh/guide/essentials/route-matching-syntax.md#optional-parameters)。这样做是为了让我们在需要的时候，可以通过将 `path` 拆分成一个数组，直接导航到路由：
 
 ```js
 this.$router.push({
@@ -97,10 +97,10 @@ this.$router.push({
 })
 ```
 
-See more in the [repeated params](/guide/essentials/route-matching-syntax.md#repeatable-params) section.
+更多内容请参见[重复参数](/zh/guide/essentials/route-matching-syntax.md#repeatable-params)部分。
 
-If you are using [History mode](./history-mode.md), make sure to follow the instructions to correctly configure your server as well.
+如果你正在使用[历史模式](./zh/history-mode.md)，请务必按照说明正确配置你的服务器。
 
-## Advanced Matching Patterns
+## 高级匹配模式
 
-Vue Router uses its own path matching syntax, inspired by the one used by `express`, so it supports many advanced matching patterns such as optional params, zero or more / one or more requirements, and even custom regex patterns. Please check the [Advanced Matching](./route-matching-syntax.md) documentation to explore them.
+Vue Router 使用自己的路径匹配语法，其灵感来自于 `express` ，因此它支持许多高级匹配模式，如可选的参数，零或多个 / 一个或多个，甚至自定义的正则匹配规则。请查看[高级匹配](./zh/route-matching-syntax.md)文档来探索它们。
