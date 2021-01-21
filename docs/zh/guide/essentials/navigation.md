@@ -73,29 +73,29 @@ router.replace({ path: '/home' })
 
 ## 横夸历史
 
-This method takes a single integer as parameter that indicates by how many steps to go forward or go backward in the history stack, similar to `window.history.go(n)`.
+该方法采用一个整数作为参数，表示在历史堆栈中前进或后退多少步，类似于 `window.history.go(n)`。
 
-Examples
+例子
 
 ```js
-// go forward by one record, the same as router.forward()
+// 向前移动一条记录，与 router.forward() 相同
 router.go(1)
 
-// go back by one record, the same as router.back()
+// 返回一条记录，与router.back() 相同 
 router.go(-1)
 
-// go forward by 3 records
+// 前进 3 条记录
 router.go(3)
 
-// fails silently if there aren't that many records
+// 如果没有那么多记录，静默失败 
 router.go(-100)
 router.go(100)
 ```
 
 ## 篡改历史
 
-You may have noticed that `router.push`, `router.replace` and `router.go` are counterparts of [`window.history.pushState`, `window.history.replaceState` and `window.history.go`](https://developer.mozilla.org/en-US/docs/Web/API/History), and they do imitate the `window.history` APIs.
+你可能已经注意到，`router.push`、`router.replace` 和 `router.go` 是 [`window.history.pushState`、`window.history.replaceState` 和 `window.history.go`](https://developer.mozilla.org/en-US/docs/Web/API/History) 的翻版，它们确实模仿了 `window.history` 的 API。
 
-Therefore, if you are already familiar with [Browser History APIs](https://developer.mozilla.org/en-US/docs/Web/API/History_API), manipulating history will feel familiar when using Vue Router.
+因此，如果你已经熟悉 [Browser History APIs](https://developer.mozilla.org/en-US/docs/Web/API/History_API) ，在使用 Vue Router 时，操作历史记录就会觉得很熟悉。
 
-It is worth mentioning that Vue Router navigation methods (`push`, `replace`, `go`) work consistently no matter the kind of [`history` option](/api/#history) is passed when creating the router instance.
+值得一提的是，无论在创建路由器实例时传递什么样的[`history` 配置](/zh/api/#history)，Vue Router 的导航方法(`push`、`replace`、`go`)都能始终如一地工作。
