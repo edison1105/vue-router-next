@@ -164,7 +164,7 @@ app.config.globalProperties.append = (path, pathToAppend) =>
 
 ### 删除 `<router-link>` 中的 `event` 和 `tag` 属性
 
-`<router-link>` 中的 `event` 和 `tag` 属性都已被删除。你可以使用 [`v-slot`API](/api/#router-link-s-v-slot) 来完全定制 `<router-link>`：
+`<router-link>` 中的 `event` 和 `tag` 属性都已被删除。你可以使用 [`v-slot`API](/zh/api/#router-link-s-v-slot) 来完全定制 `<router-link>`：
 
 ```html
 将
