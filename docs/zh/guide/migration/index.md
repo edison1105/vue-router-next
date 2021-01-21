@@ -1,6 +1,6 @@
 # 从 Vue2 迁移
 
-在 Vue Router API 从 v3（Vue2）到 v4（Vue3）的重写过程中，大部分的 Vue Router API 都没有变化，但是在迁移你的应用程序时，你可能会遇到一些破坏性的变化。本指南将帮助你了解为什么会发生这些变化，以及如何调整你的应用程序，使其与 Vue Router4 兼容。
+在 Vue Router API 从 v3（Vue2）到 v4（Vue3）的重写过程中，大部分的 Vue Router API 都没有变化，但是在迁移你的程序时，你可能会遇到一些破坏性的变化。本指南将帮助你了解为什么会发生这些变化，以及如何调整你的程序，使其与 Vue Router4 兼容。
 
 ## 破坏性变化
 
@@ -28,7 +28,7 @@ const router = createRouter({
 - `"hash"`: `createWebHashHistory()`
 - `"abstract"`: `createMemoryHistory()`
 
-下面是一个完整的片段：
+下面是一个完整的代码段：
 
 ```js
 import { createRouter, createWebHistory } from 'vue-router'
@@ -57,7 +57,7 @@ router.isReady().then(() => {
 
 ### 移动了 `base` 配置
 
-现在，`base` 配置被作为 `createWebHistory` (和其他 history)的第一个参数传递：
+现在，`base` 配置被作为 `createWebHistory` (其他 history 也一样)的第一个参数传递：
 
 ```js
 import { createRouter, createWebHistory } from 'vue-router'
@@ -69,16 +69,16 @@ createRouter({
 
 ### 删除了 `*`（星标或包含全部）路由
 
-现在必须使用自定义的 regex 参数来定义所有路由(`*`, `/*`)：
+现在必须使用自定义的 regex 参数来定义所有路由(`*`、`/*`)：
 
 ```js
 const routes = [
   // pathMatch 是参数的名称，例如，跳转到 /not/found 会得到
   // { params: { params: { pathMatch: ['not', 'found'] }}
   // 这要归功于最后一个 *，意思是重复的参数，如果你
-  // 打算直接使用未匹配的路径名称导航到该路径
+  // 打算直接使用未匹配的路径名称导航到该路径，这是必要的
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
-  // 如果你省略了最后的 `*`，在解析或跳转时，params 中的 `/` 字符将被编码
+  // 如果你省略了最后的 `*`，在解析或跳转时，参数中的 `/` 字符将被编码
   { path: '/:pathMatch(.*)', name: 'bad-not-found', component: NotFound },
 ]
 // 如果使用命名路由，不好的例子：
@@ -94,11 +94,11 @@ router.resolve({
 ```
 
 :::tip
-如果你不打算直接使用未匹配的路由名称跳转到该路由，就不需要为重复的参数添加 `*`。如果你调用 `router.push('/not/found/url')`，它将提供正确的 `pathMatch` 参数。
+如果您不打算使用其名称直接跳转到未找到的路由，则无需为重复的参数添加 `*`。如果你调用 `router.push('/not/found/url')`，它将提供正确的 `pathMatch` 参数。
 :::
 
 
-**原因**：Vue Router 不再使用 `path-to-regexp`，而是实现了自己的解析系统，允许路由排序并实现动态路由。由于我们通常在每个项目中只添加一个单一的包罗万象的路由，所以支持 `*` 的特殊语法并没有太大的好处。参数的编码是跨路由的，毫无例外地让事情更容易预测。
+**原因**：Vue Router 不再使用 `path-to-regexp`，而是实现了自己的解析系统，允许路由排序并实现动态路由。由于我们通常在每个项目中只添加一个包含全部的路由，所以支持 `*` 的特殊语法并没有太大的好处。参数的编码是跨路由的，无一例外，让事情更容易预测。
 
 ### 将 `onReady` 改为 `isReady`
 
@@ -122,7 +122,7 @@ try {
 
 `scrollBehavior` 中返回的对象与 [`ScrollToOptions`](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions) 类似：`x` 改名为 `left`，`y` 改名为 `top`。详见 [RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0035-router-scroll-position.md)。
 
-**原因**：使该对象类似于 `ScrollToOptions`，以使其感觉更像原生 JS API，并有可能启用未来的新配置。
+**原因**：使该对象类似于 `ScrollToOptions`，以使其感觉更像原生 JS API，并有可能启用将来的新配置。
 
 ### `<router-view>`、`<keep-alive>` 和 `<transition>`
 
@@ -160,7 +160,7 @@ app.config.globalProperties.append = (path, pathToAppend) =>
   path + (path.endsWith('/') ? '' : '/') + pathToAppend
 ```
 
-**原因**：`append` 使用频率不高，很容易在使用方仿制。
+**原因**：`append` 使用频率不高，用户可以很容易地实现。
 
 ### 删除 `<router-link>` 中的 `event` 和 `tag` 属性
 
@@ -175,7 +175,7 @@ app.config.globalProperties.append = (path, pathToAppend) =>
 </router-link>
 ```
 
-**原因**：这些属性经常一起使用，以使用与 `<a>` 标签不同的东西，但这些属性是在 `v-slot` API 之前引入的，而且没有足够的理由为所有人增加 bundle 包的大小。
+**原因**：这些属性经常一起使用，以使用与 `<a>` 标签不同的东西，但这些属性是在 `v-slot` API 之前引入的，并且没有足够的使用，因此没有足够的理由为每个人增加 bundle 包的大小。
 
 ### 删除 `<router-link>` 中的 `exact` 属性
 
@@ -208,11 +208,11 @@ router.currentRoute.value.matched.flatMap(record =>
 )
 ```
 
-**原因**：这个方法只在 SSR 中使用，而且是一种单行线，可由用户完成。
+**原因**：这个方法只在 SSR 中使用，并且是用户一行就能完成的操作。
 
-### **所有**的导航现在总是异步的
+### **所有**的导航现在都是异步的
 
-所有的导航，包括第一个导航，现在都是异步的，这意味着，如果你使用一个 `transition`，你可能需要等待路由 _ready_ 好后再挂载应用程序：
+所有的导航，包括第一个导航，现在都是异步的，这意味着，如果你使用一个 `transition`，你可能需要等待路由 _ready_ 好后再挂载程序：
 
 ```js
 app.use(router)
@@ -222,11 +222,11 @@ router.isReady().then(() => app.mount('#app'))
 
 否则会有一个初始过渡，就像你提供了 `appear` 属性到 `transition` 一样，因为路由会显示它的初始地址（什么都没有），然后显示第一个地址。
 
-请注意，**如果在初始导航时有导航守卫**，你可能不想阻止应用程序渲染，直到它们被解析，除非你正在进行服务器端渲染。否则，在这种情况下，不等待路由准备好挂载应用会产生与Vue2 中相同的结果。
+请注意，**如果在初始导航时有导航守卫**，你可能不想阻止程序渲染，直到它们被解析，除非你正在进行服务器端渲染。否则，在这种情况下，不等待路由准备好挂载应用会产生与Vue2 中相同的结果。
 
 ### 删除 `router.app`
 
-`router.app` 用于表示注入路由的最后一个根组件（Vue实例）。Vue Router 现在可以被多个 Vue 应用程序同时安全使用。你仍然可以在使用路由时添加它：
+`router.app` 用于表示注入路由的最后一个根组件（Vue 实例）。Vue Router 现在可以被多个 Vue 程序同时安全使用。你仍然可以在使用路由时添加它：
 
 ```js
 app.use(router)
@@ -235,9 +235,9 @@ router.app = app
 
 你也可以扩展 `Router` 接口的 TypeScript 定义来添加 `app` 属性。
 
-**原因**：Vue3 写的程序不能在 Vue2 中使用，现在我们使用同一 Router 实例来支持多个应用程序，因此拥有 `app` 属性可能会产生误导，因为它本来是应用程序而不是根实例。 
+**原因**：Vue3 写的程序不能在 Vue2 中使用，现在我们使用同一个 Router 实例来支持多个程序，因此拥有 `app` 属性可能会产生误导，因为它是程序而不是根实例。 
 
-### 将内容传递给路由组件 `<slot>`
+### 将内容传递给路由组件的 `<slot>`
 
 之前你可以直接传递一个模板，通过嵌套在 `<router-view>` 组件下，由路由组件的 `<slot>` 来渲染：
 
@@ -247,7 +247,7 @@ router.app = app
 </router-view>
 ```
 
-由于 `<router-view>` 引入了 `v-slot` API，你必须使用 `v-slot` API将其传递给 `<component>`：
+由于 `<router-view>` 引入了 `v-slot` API，你必须使用 `v-slot` API 将其传递给 `<component>`：
 
 ```html
 <router-view v-slot="{ Component }">
@@ -314,7 +314,7 @@ history.replaceState(history.state, '', url)
 createRouter({ routes: [] })
 ```
 
-**原因**：路由的设计是为了创建路由，尽管你可以在以后添加它们。在大多数情况下，你至少需要一条路由，一般每个应用都会写一次。
+**原因**：路由的设计是为了创建路由，尽管你可以在以后添加它们。在大多数情况下，你至少需要一条路由，一般每个应用都会编写一次。
 
 ### 不存在的命名路由
 
@@ -326,11 +326,11 @@ router.push({ name: 'homee' }) // 报错
 router.resolve({ name: 'homee' }) // 报错
 ```
 
-**原因**：以前，路由器会导航到 `/`，但不显示任何内容（而不是主页）。抛出一个错误更有意义，因为我们不能产生一个有效的 URL 来导航
+**原因**：以前，路由会导航到 `/`，但不显示任何内容（而不是主页）。抛出一个错误更有意义，因为我们不能生成一个有效的 URL 进行导航
 
 ### 命名路由缺少必要的 `params`
 
-在没有所需参数的情况下跳转或解析命名路由，会产生错误：
+在没有传递所需参数的情况下跳转或解析命名路由，会产生错误：
 
 ```js
 // 给与以下路由:
@@ -343,7 +343,7 @@ router.resolve({ name: 'user' })
 
 **原因**：同上。
 
-### 名称为空的子路由不再添加斜杠
+### 带有空 `path` 的命名子路由不再添加斜线
 
 给予任何空 `path` 的嵌套命名路由：
 
@@ -387,19 +387,19 @@ const routes = [
 
 <!-- Learn more about relative links [in the cookbook](/cookbook/relative-links.md). -->
 
-**原因**：这是为了使尾部的斜线行为保持一致：默认情况下，所有路由都允许使用尾部的斜线。可以通过使用 `strict` 配置和手动添加(或不添加)斜杠到路由中来禁用。
+**原因**：这是为了使尾部的斜线行为保持一致：默认情况下，所有路由都允许使用尾部的斜线。可以通过使用 `strict` 配置和手动添加(或不添加)斜线来禁用它。
 
 <!-- TODO: maybe a cookbook entry -->
 
 ### `$route` 属性编码
 
-无论在哪里启动导航，`params`、`query`和 `hash` 中的解码值现在都是一致的（旧的浏览器仍然会产生未编码的 `path` 和 `fullPath`）。初始导航应产生与应用内导航相同的结果。
+无论在哪里启动导航，`params`、`query`和 `hash` 中的解码值现在都是一致的（旧的浏览器仍然会产生未编码的 `path` 和 `fullPath`）。初始导航应产生与应用内部导航相同的结果。
 
 给定任何 [规范化的路由地址](/zh/api/#routelocationnormalized):
 
 - `hash` 现在被解码了，这样就可以复制过来。`router.push({ hash: $route.hash })` 可以直接用于 [scrollBehavior](/zh/api/#scrollbehavior) 的 `el` 选项中。
 - 当使用 `push`、`resolve` 和 `replace` 并在对象中提供 `string` 地址或 `path` 属性时，**必须进行编码**(像以前的版本一样)。另一方面，`params`、`query` 和 `hash` 必须以未编码的版本提供。
-- 斜杠字符(`/`)现在已在 `params` 内正确解码，同时仍在 URL 上产生一个编码版本：`%2F`。
+- 斜线字符(`/`)现在已在 `params` 内正确解码，同时仍在 URL 上产生一个编码版本：`%2F`。
 
 **原因**：这样，在调用 `router.push()` 和 `router.resolve()` 时，可以很容易地复制一个地址的现有属性，并使产生的路由地址在各浏览器之间保持一致。`router.push()` 现在是幂等的，这意味着调用 `router.push(route.fullPath)`、`router.push({ hash: route.hash })`、`router.push({ query: route.query })` 和`router.push({ params: route.params })` 不会产生额外的编码。
 
