@@ -1,60 +1,60 @@
-# Navigation Guards
+# 导航守卫
 
-As the name suggests, the navigation guards provided by Vue router are primarily used to guard navigations either by redirecting it or canceling it. There are a number of ways to hook into the route navigation process: globally, per-route, or in-component.
+正如其名， vue-router 提供的导航守卫主要用来通过跳转或取消的方式守卫导航。这里有很多方式植入路由导航中：全局的，单个路由独享的， 或者组件级的。
 
-## Global Before Guards
+## 全局前置守卫
 
-You can register global before guards using `router.beforeEach`:
+你可以使用 `router.beforeEach` 注册一个全局前置守卫：
 
 ```js
 const router = createRouter({ ... })
 
 router.beforeEach((to, from) => {
   // ...
-  // explicitly return false to cancel the navigation
+  // 返回 false 以取消导航
   return false
 })
 ```
 
-Global before guards are called in creation order, whenever a navigation is triggered. Guards may be resolved asynchronously, and the navigation is considered **pending** before all hooks have been resolved.
+当一个导航触发时，全局前置守卫按照创建顺序调用。守卫是异步解析执行，此时导航在所有守卫 resolve 完之前一直处于**等待中**。
 
-Every guard function receives two arguments:
+每个守卫方法接收两个参数：
 
-- **`to`**: the target route location [in a normalized format](/api/#routelocationnormalized) being navigated to.
-- **`from`**: the current route location [in a normalized format](/api/#routelocationnormalized) being navigated away from.
+- **`to`**: 即将要进入的目标 [用一种标准化的方式](/api/#routelocationnormalized)
+- **`from`**: 当前导航正要离开的路由 [用一种标准化的方式](/api/#routelocationnormalized)
 
-And can optionally return any of the following values:
+可以返回的值如下:
 
-- `false`: cancel the current navigation. If the browser URL was changed (either manually by the user or via back button), it will be reset to that of the `from` route.
-- A [Route Location](/api/#routelocationraw): Redirect to a different location by passing a route location as if you were calling [`router.push()`](/api/#push), which allows you to pass options like `replace: true` or `name: 'home'`. The current navigation is dropped and a new one is created with the same `from`.
+- `false`: 取消当前的导航。如果浏览器的 URL 改变了(可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 `from` 路由对应的地址。
+- 一个[路由地址](/api/#routelocationraw): 通过一个路由地址跳转到一个不同的地址，就像你调用 [`router.push()`](/api/#push) 一样， 你可以设置诸如 `replace: true` 或 `name: 'home'` 之类的选项。当前的导航被中断，然后进行一个新的导航，就和 `from` 一样。
 
-It's also possible to throw an `Error` if an unexpected situation was met. This will also cancel the navigation and call any callback registered via [`router.onError()`](/api/#onerror).
+如果遇到了意料之外的情况，可能会抛出一个 `Error` 。这会取消导航并且调用 [`router.onError()`](/api/#onerror) 注册过的回调。
 
-If nothing, `undefined` or `true` is returned, **the navigation is validated**, and the next navigation guard is called.
+如果什么都没有，`undefined` 或返回 `true` ，**则导航是有效的**，并调用下一个导航卫士
 
-All of the the things above **work the same way with `async` functions** and Promises:
+以上所有都同 **`async` 函数** 和 Promise 工作方式一样：
 
 ```js
 router.beforeEach(async (to, from) => {
-  // canUserAccess() returns `true` or `false`
+  // canUserAccess() 返回 `true` 或 `false`
   return await canUserAccess(to)
 })
 ```
 
-### Optional third argument `next`
+### 可选的第三个参数 `next`
 
-In previous versions of Vue Router, it was also possible to use a _third argument_ `next`, this was a common source of mistakes and went through an [RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0037-router-return-guards.md#motivation) to remove it. However, it is still supported, meaning you can pass a third argument to any navigation guard. In that case, **you must call `next` exactly once** in any given pass through a navigation guard. It can appear more than once, but only if the logical paths have no overlap, otherwise the hook will never be resolved or produce errors. Here is **a bad example** of redirecting to user to `/login` if they are not authenticated:
+在之前的 Vue Router 版本中，也是可以使用 _第三个参数_ `next` 的。这是一个常见的错误来源，可以通过 [RFC](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0037-router-return-guards.md#motivation) 来消除错误。然而，它仍然是被支持的，这意味着你可以向任何导航卫士传递第三个参数。在这种情况下，**确保 `next`** 在任何给定的导航守卫中都被**严格调用一次**。它可以出现多于一次，但是只能在所有的逻辑路径都不重叠的情况下，否则钩子永远都不会被解析或报错。这里有一个在用户未能验证身份时重定向到`/login`的**错误用例**：
 
 ```js
 // BAD
 router.beforeEach((to, from, next) => {
   if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
-  // if the user is not authenticated, `next` is called twice
+  // 如果用户未能验证身份， 则 `next` 会被调用两次
   next()
 })
 ```
 
-Here is the correct version:
+下面是正确的版本:
 
 ```js
 // GOOD
@@ -64,9 +64,9 @@ router.beforeEach((to, from, next) => {
 })
 ```
 
-## Global Resolve Guards
+## 全局解析守卫
 
-You can register a global guard with `router.beforeResolve`. This is similar to `router.beforeEach` because it triggers on **every navigation**, but resolve guards are called right before the navigation is confirmed, **after all in-component guards and async route components are resolved**. Here is an example that ensures the user has given access to the Camera for routes that [have defined a custom meta](./meta.md) property `requiresCamera`:
+你可以用 `router.beforeResolve` 注册一个全局守卫。这和 `router.beforeEach` 类似，因为它在 **每次导航**时都会触发，但是确保在导航被确认之前，**同时在所有组件内守卫和异步路由组件被解析之后，解析守卫就被正确调用**。这里有一个例子，确保用户可以访问[自定义 meta](./meta.md) 属性 `requiresCamera` 的路由：
 
 ```js
 router.beforeResolve(async to => {
@@ -75,10 +75,10 @@ router.beforeResolve(async to => {
       await askForCameraPermission()
     } catch (error) {
       if (error instanceof NotAllowedError) {
-        // ... handle the error and then cancel the navigation
+        // ... 处理错误，然后取消导航
         return false
       } else {
-        // unexpected error, cancel the navigation and pass the error to the global handler
+        // 意料之外的错误，取消导航并把错误传给全局处理器
         throw error
       }
     }
@@ -86,13 +86,13 @@ router.beforeResolve(async to => {
 })
 ```
 
-`router.beforeResolve` is the ideal spot to fetch data or do any other operation that you want to avoid doing if the user cannot enter a page.
+`router.beforeResolve` 是一个理想的位置，可以在用户无法进入页面的情况下，获取数据或进行任何其他你想避免的操作。
 
 <!-- TODO: how to combine with [`meta` fields](./meta.md) to create a [generic fetching mechanism](#TODO). -->
 
-## Global After Hooks
+## 全局后置钩子
 
-You can also register global after hooks, however unlike guards, these hooks do not get a `next` function and cannot affect the navigation:
+你也可以注册全局后置钩子，然而和守卫不同的是，这些钩子不会接受 `next` 函数也不会改变导航本身：
 
 ```js
 router.afterEach((to, from) => {
@@ -102,9 +102,9 @@ router.afterEach((to, from) => {
 
 <!-- TODO: maybe add links to examples -->
 
-They are useful for analytics, changing the title of the page, accessibility features like announcing the page and many other things.
+它们对于分析、更改页面标题、声明页面等辅助功能以及许多其他事情都很有用。
 
-They also reflect [navigation failures](./navigation-failures.md) as the third argument:
+它们也反映了 [navigation failures](./navigation-failures.md) 作为第三个参数：
 
 ```js
 router.afterEach((to, from, failure) => {
@@ -112,11 +112,11 @@ router.afterEach((to, from, failure) => {
 })
 ```
 
-Learn more about navigation failures on [its guide](./navigation-failures.md).
+了解更多关于 navigation failures 的信息在[它的指南](./navigation-failures.md)中。
 
-## Per-Route Guard
+## 路由独享的守卫
 
-You can define `beforeEnter` guards directly on a route's configuration object:
+你可以直接在路由配置上定义 `beforeEnter` 守卫：
 
 ```js
 const routes = [
@@ -131,9 +131,9 @@ const routes = [
 ]
 ```
 
-`beforeEnter` guards **only trigger when entering the route**, they don't trigger when the `params`, `query` or `hash` change e.g. going from `/users/2` to `/users/3` or going from `/users/2#info` to `/users/2#projects`. They are only triggered when navigating **from a different** route.
+`beforeEnter` 守卫 **只在进入路由时触发**，不会在 `params`、`query` 或 `hash` 改变时触发。例如，从 `/users/2` 进入到 `/users/3` 或者从 `/users/2#info` 进入到 `/users/2#projects`。它们只有在 **从一个不同的** 路由导航时，才会被触发。
 
-You can also pass an array of functions to `beforeEnter`, this is useful when reusing guards for different routes:
+你也可以将一个函数数组传递给 `beforeEnter`，这在为不同的路由重用守卫时很有用：
 
 ```js
 function removeQueryParams(to) {
@@ -159,15 +159,15 @@ const routes = [
 ]
 ```
 
-Note it is possible to achieve a similar behavior by using [route meta fields](./meta.md) and [global navigation guards](#global-before-guards).
+请注意，你也可以通过使用[路径 meta 字段](./meta.md)和[全局导航守卫](#global-before-guards)来实现类似的行为。
 
-## In-Component Guards
+## 组件内的守卫
 
-Finally, you can directly define route navigation guards inside route components (the ones passed to the router configuration)
+最后，你可以在路由组件内直接定义路由导航守卫(传递给路由配置的)
 
-### Using the options API
+### 可用的选项 API
 
-You can add the following options to route components:
+你可以为路由组件添加以下选项：
 
 - `beforeRouteEnter`
 - `beforeRouteUpdate`
@@ -177,39 +177,36 @@ You can add the following options to route components:
 const UserDetails = {
   template: `...`,
   beforeRouteEnter(to, from) {
-    // called before the route that renders this component is confirmed.
-    // does NOT have access to `this` component instance,
-    // because it has not been created yet when this guard is called!
+    // 在渲染该组件的对应路由被验证前调用
+    // 不能获取组件实例 `this` ！
+    // 因为当守卫执行时，组件实例还没被创建！
   },
   beforeRouteUpdate(to, from) {
-    // called when the route that renders this component has changed,
-    // but this component is reused in the new route.
-    // For example, given a route with params `/users/:id`, when we
-    // navigate between `/users/1` and `/users/2`, the same `UserDetails` component instance
-    // will be reused, and this hook will be called when that happens.
-    // Because the component is mounted while this happens, the navigation guard has access to `this` component instance.
+    // 在当前路由改变，但是该组件被复用时调用
+    // 举例来说，对于一个带有动态参数的路径 `/users/:id`，在 `/users/1` 和 `/users/2` 之间跳转的时候，
+    // 由于会渲染同样的 `UserDetails` 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
+    // 因为在这种情况发生的时候，组件已经挂载好了，导航守卫可以访问组件实例 `this`
   },
   beforeRouteLeave(to, from) {
-    // called when the route that renders this component is about to
-    // be navigated away from.
-    // As with `beforeRouteUpdate`, it has access to `this` component instance.
+    // 在导航离开渲染该组件的对应路由时调用
+    // 与 `beforeRouteUpdate` 一样，它可以访问组件实例 `this`
   },
 }
 ```
 
-The `beforeRouteEnter` guard does **NOT** have access to `this`, because the guard is called before the navigation is confirmed, thus the new entering component has not even been created yet.
+`beforeRouteEnter` 守卫 **不能** 访问 `this`，因为守卫在导航确认前被调用，因此即将登场的新组件还没被创建。
 
-However, you can access the instance by passing a callback to `next`. The callback will be called when the navigation is confirmed, and the component instance will be passed to the callback as the argument:
+不过，你可以通过传一个回调给 `next` 来访问组件实例。在导航被确认的时候执行回调，并且把组件实例作为回调方法的参数：
 
 ```js
 beforeRouteEnter (to, from, next) {
   next(vm => {
-    // access to component public instance via `vm`
+    // 通过 `vm` 访问组件实例
   })
 }
 ```
 
-Note that `beforeRouteEnter` is the only guard that supports passing a callback to `next`. For `beforeRouteUpdate` and `beforeRouteLeave`, `this` is already available, so passing a callback is unnecessary and therefore _not supported_:
+注意 `beforeRouteEnter` 是支持给 `next` 传递回调的唯一守卫。对于 `beforeRouteUpdate` 和 `beforeRouteLeave` 来说，`this` 已经可用了，所以*不支持* 传递回调，因为没有必要了：
 
 ```js
 beforeRouteUpdate (to, from) {
@@ -218,7 +215,7 @@ beforeRouteUpdate (to, from) {
 }
 ```
 
-The **leave guard** is usually used to prevent the user from accidentally leaving the route with unsaved edits. The navigation can be canceled by returning `false`.
+这个 **离开守卫** 通常用来预防用户在还未保存修改前突然离开。该导航可以通过返回 `false` 来取消。
 
 ```js
 beforeRouteLeave (to, from) {
@@ -227,21 +224,21 @@ beforeRouteLeave (to, from) {
 }
 ```
 
-### Using the composition API
+### 使用组合 API
 
-If you are writing your component using the [composition API and a `setup` function](https://v3.vuejs.org/guide/composition-api-setup.html#setup), you can add update and leave guards through `onBeforeRouteUpdate` and `onBeforeRouteLeave` respectively. Please refer to the [Composition API section](./composition-api.md#navigation-guards) for more details.
+如果你正在使用[组合 API 和 `setup` 函数](https://v3.vuejs.org/guide/composition-api-setup.html#setup)来编写组件， 你可以通过 `onBeforeRouteUpdate` 和 `onBeforeRouteLeave` 分别添加 update 和 leave 守卫。 请参考[组合 API 部分](./composition-api.md#navigation-guards)以获得更多细节。
 
-## The Full Navigation Resolution Flow
+## 完整的导航解析流程
 
-1. Navigation triggered.
-2. Call `beforeRouteLeave` guards in deactivated components.
-3. Call global `beforeEach` guards.
-4. Call `beforeRouteUpdate` guards in reused components.
-5. Call `beforeEnter` in route configs.
-6. Resolve async route components.
-7. Call `beforeRouteEnter` in activated components.
-8. Call global `beforeResolve` guards.
-9. Navigation is confirmed.
-10. Call global `afterEach` hooks.
-11. DOM updates triggered.
-12. Call callbacks passed to `next` in `beforeRouteEnter` guards with instantiated instances.
+1. 导航被触发。
+2. 在失活的组件里调用 `beforeRouteLeave` 守卫。
+3. 调用全局的 `beforeEach` 守卫。
+4. 在重用的组件里调用 `beforeRouteUpdate` 守卫(2.2+)。
+5. 在路由配置里调用 `beforeEnter` 。
+6. 解析异步路由组件。
+7. 在被激活的组件里调用 `beforeRouteEnter`。
+8. 调用全局的 `beforeResolve` 守卫(2.5+)。
+9. 导航被确认。
+10. 调用全局的 `afterEach` 钩子。
+11. 触发 DOM 更新。
+12. 调用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数，创建好的组件实例会作为回调函数的参数传入。
