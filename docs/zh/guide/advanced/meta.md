@@ -1,6 +1,6 @@
-# Route Meta Fields
+# 路由元信息
 
-Sometimes, you might want to attach arbitrary information to routes like transition names, who can access the route, etc. This can be achieved through the `meta` property which accepts an object of properties and can be accessed on the route location and navigation guards. You can define `meta` properties like this:
+有时，你可能希望将任意信息附加到路由上，如过渡名称、谁可以访问路由等。这些事情可以通过接收属性对象的`meta`属性来实现，并且它可以在路由位置和导航守卫上都被访问到。定义路由的时候你可以这样配置 `meta` 字段：
 
 ```js
 const routes = [
@@ -11,13 +11,13 @@ const routes = [
       {
         path: 'new',
         component: PostsNew,
-        // only authenticated users can create posts
+        // 只有经过身份验证的用户才能创建帖子
         meta: { requiresAuth: true }
       },
       {
         path: ':id',
         component: PostsDetail
-        // anybody can read a post
+        // 任何人都可以阅读文章
         meta: { requiresAuth: false }
       }
     ]
@@ -25,26 +25,26 @@ const routes = [
 ]
 ```
 
-So how do we access this `meta` field?
+那么如何访问这个 `meta` 字段呢？
 
 <!-- TODO: the explanation about route records should be explained before and things should be moved here -->
 
-First, each route object in the `routes` configuration is called a **route record**. Route records may be nested. Therefore when a route is matched, it can potentially match more than one route record.
+首先，我们称呼 `routes` 配置中的每个路由对象为 **路由记录**。路由记录可以是嵌套的，因此，当一个路由匹配成功后，它可能匹配多个路由记录。
 
-For example, with the above route config, the URL `/posts/new` will match both the parent route record (`path: '/posts'`) and the child route record (`path: 'new'`).
+例如，根据上面的路由配置，`/posts/new` 这个 URL 将会匹配父路由记录 (`path: '/posts'`) 以及子路由记录 (`path: 'new'`)。
 
-All route records matched by a route are exposed on the `$route` object (and also route objects in navigation guards) as the `$route.matched` Array. We could loop through that array to check all `meta` fields, but Vue Router also provides you a `$route.meta` that is a non-recursive merge of **all `meta`** fields from parent to child. Meaning you can simply write
+一个路由匹配到的所有路由记录会暴露为 `$route` 对象(还有在导航守卫中的路由对象)的`$route.matched` 数组。我们需要遍历这个数组来检查路由记录中的 `meta` 字段，但是 Vue Router 还为你提供了一个 `$route.meta` 方法，它是一个非递归合并**所有 `meta`** 字段的（从父字段到子字段）的方法。这意味着你可以简单地写
 
 ```js
 router.beforeEach((to, from) => {
-  // instead of having to check every route record with
+  // 而不是去检查每条路由记录
   // to.matched.some(record => record.meta.requiresAuth)
   if (to.meta.requiresAuth && !auth.isLoggedIn()) {
-    // this route requires auth, check if logged in
-    // if not, redirect to login page.
+    // 此路由需要授权，请检查是否已登录
+    // 如果没有，则重定向到登录页面
     return {
       path: '/login',
-      // save the location we were at to come back later
+      // 保存我们所在的位置，以便以后再来
       query: { redirect: to.fullPath },
     }
   }
@@ -53,14 +53,14 @@ router.beforeEach((to, from) => {
 
 ## TypeScript
 
-It is possible to type the meta field by extending the `RouteMeta` interface:
+可以通过扩展 `RouteMeta` 接口来输入 meta 字段：
 
 ```ts
 declare module 'vue-router' {
   interface RouteMeta {
-    // is optional
+    // 是可选的
     isAdmin?: boolean
-    // must be declared by every route
+    // 每个路由都必须声明
     requiresAuth: boolean
   }
 }

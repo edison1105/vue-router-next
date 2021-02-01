@@ -1,8 +1,8 @@
-# Extending RouterLink
+# 扩展 RouterLink
 
-The RouterLink component exposes enough `props` to suffice most basic applications but it doesn't try to cover every possible use case and you will likely find yourself using `v-slot` for some advanced cases. In most medium to large sized applications, it's worth creating one if not multiple custom RouterLink components to reuse them across your application. Some examples are Links in a Navigation Menu, handling external links, adding an `inactive-class`, etc.
+RouterLink 组件提供了足够的 `props` 来满足大多数基本应用程序的需求，但它并没有试图覆盖所有可能的用例。你可能会发现自己在某些高级用例中使用`v-slot` ，而在大多数中大型应用中，创建一个甚至多个自定义的 RouterLink 组件是非常值得的，因为可以在你的应用中重复使用它们。例如导航菜单中的链接、处理外部链接、添加`非活动类`等。
 
-Let's extend RouterLink to handle external links as well and adding a custom `inactive-class` in an `AppLink.vue` file:
+让我们扩展 RouterLink 来处理外部链接，并在 `AppLink.vue` 文件中添加一个自定义的`非活动类`：
 
 ```vue
 <template>
@@ -33,7 +33,7 @@ export default {
   name: 'AppLink',
 
   props: {
-    // add @ts-ignore if using TypeScript
+    // 如果使用 TypeScript，请添加 @ts-ignore
     ...RouterLink.props,
     inactiveClass: String,
   },
@@ -47,7 +47,7 @@ export default {
 </script>
 ```
 
-If you prefer using a render function or create `computed` properties, you can use the `useLink` from the [Composition API](./composition-api.md):
+如果你喜欢使用渲染函数或创建 `computed` 属性，你可以使用 [Composition API](./composition-api.md)中的 `useLink` ：
 
 ```js
 import { RouterLink, useLink } from 'vue-router'
@@ -56,25 +56,26 @@ export default {
   name: 'AppLink',
 
   props: {
-    // add @ts-ignore if using TypeScript
+    // 如果使用 TypeScript，请添加 @ts-ignore
     ...RouterLink.props,
     inactiveClass: String,
   },
 
   setup(props) {
-    // toRef allows us to extract one prop and keep it reactive
+    // toRef 允许我们提取一个 prop 并保持它的响应
     // https://v3.vuejs.org/api/refs-api.html#toref
-    const { navigate, href, route, isActive, isExactActive } = useLink(toRef(props, 'to'))
-
+    const { navigate, href, route, isActive, isExactActive } = useLink(
+      toRef(props, 'to')
+    )
 
     // profit!
 
     return { isExternalLink }
-  }
+  },
 }
 ```
 
-In practice, you might want to use your `AppLink` component for different parts of your application. e.g. using [Tailwind CSS](https://tailwindcss.com), you could create a `NavLink.vue` component with all the classes:
+在实践中，您可能希望将您的 `AppLink` 组件用于应用程序的不同部分。例如，使用 [Tailwind CSS](https://tailwindcss.com)，你可以用所有的类创建一个 `NavLink.vue` 组件：
 
 ```vue
 <template>
