@@ -51,12 +51,6 @@ Vue Router is part of the Vue Ecosystem and is an MIT-licensed open source proje
       <img src="https://avatars.githubusercontent.com/u/8292810" height="26px" alt="RTVision" />
     </picture>
   </a>
-    <a href="https://storyblok.com" target="_blank" rel="noopener noreferrer">
-    <picture>
-      <source srcset="https://posva-sponsors.pages.dev/logos/storyblok.png" media="(prefers-color-scheme: dark)" height="26px" alt="Storyblok" />
-      <img src="https://posva-sponsors.pages.dev/logos/storyblok.png" height="26px" alt="Storyblok" />
-    </picture>
-  </a>
 </p>
 
 <!--sponsors end-->
